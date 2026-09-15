@@ -1,0 +1,81 @@
+:root {
+	font-family: "Aptos", "Segoe UI", sans-serif;
+	color: #172433;
+	background: #e8eef3;
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	min-width: 320px;
+	background: radial-gradient(circle at 80% 0%, #d6e5ef 0, transparent 32rem), #e8eef3;
+}
+
+button, input { font: inherit; }
+
+.shell { max-width: 1180px; margin: 0 auto; padding: 42px 28px 70px; }
+.hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 28px; margin-bottom: 32px; }
+.eyebrow { margin: 0 0 8px; color: #087f8c; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+h1, h2, p { margin-top: 0; }
+h1 { max-width: 650px; margin-bottom: 12px; color: #102d45; font-size: clamp(2.3rem, 5vw, 4.8rem); line-height: .98; letter-spacing: -.04em; }
+h2 { margin-bottom: 0; color: #102d45; font-size: 1.5rem; }
+.intro { max-width: 610px; margin-bottom: 0; color: #53687a; font-size: 1.05rem; line-height: 1.55; }
+.health-pill { display: flex; align-items: center; gap: 9px; padding: 10px 14px; border: 1px solid #92d9c2; border-radius: 999px; background: #e5fbf1; color: #14684f; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.health-pill.offline { border-color: #f2c1a0; background: #fff4ed; color: #a04c22; }
+.health-dot { width: 9px; height: 9px; border-radius: 50%; background: #19aa70; box-shadow: 0 0 0 4px #c5f1de; }
+.offline .health-dot { background: #e27635; box-shadow: 0 0 0 4px #fde0ca; }
+.signal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+.signal-card { min-height: 128px; padding: 20px; border: 1px solid #d1dce4; border-top: 4px solid #2b79a8; border-radius: 5px; background: rgba(255,255,255,.8); box-shadow: 0 12px 30px rgba(30, 63, 87, .06); }
+.signal-card--orange { border-top-color: #e27b3d; }
+.signal-card--green { border-top-color: #20a271; }
+.signal-label { display: block; margin-bottom: 14px; color: #728696; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.signal-card strong { display: block; overflow: hidden; color: #183b56; font-size: 1.1rem; text-overflow: ellipsis; white-space: nowrap; }
+.signal-card small { display: block; margin-top: 8px; color: #6f8190; }
+.alert { margin: 18px 0; padding: 13px 16px; border-left: 4px solid #df7134; background: #fff3eb; color: #873c1b; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(290px, .8fr); gap: 18px; }
+.panel, .orders-section { border: 1px solid #d1dce4; background: rgba(255,255,255,.88); box-shadow: 0 16px 38px rgba(30, 63, 87, .07); }
+.panel { padding: 30px; }
+.panel--order { background: #fff; }
+.panel--explain { background: #183b56; color: #dce9f0; }
+.panel--explain h2 { color: #fff; }
+.panel--explain .eyebrow { color: #6fe0c1; }
+.panel--explain p { color: #bdd0dc; line-height: 1.6; }
+.panel-heading, .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+.step-count, .order-count { color: #8598a6; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+label { display: block; margin-bottom: 8px; color: #3f586b; font-size: 13px; font-weight: 700; }
+input { width: 100%; min-height: 48px; margin-bottom: 18px; padding: 11px 13px; border: 1px solid #b9c9d5; border-radius: 3px; outline: none; background: #fbfdfe; color: #172433; }
+input:focus { border-color: #16889a; box-shadow: 0 0 0 3px #d5f1f0; }
+.form-row { display: grid; grid-template-columns: 140px 1fr; align-items: end; gap: 14px; }
+.form-row input { margin-bottom: 0; }
+button { min-height: 48px; padding: 0 20px; border: 0; border-radius: 3px; background: #e47738; color: #fff; font-weight: 800; cursor: pointer; }
+button:hover:not(:disabled) { background: #c95e25; }
+button:disabled { cursor: wait; opacity: .55; }
+.flow { display: flex; align-items: center; gap: 8px; margin-top: 28px; color: #5b7688; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.flow i { flex: 1; height: 1px; background: #b7ccd7; }
+.panel--explain dl { margin: 26px 0 0; }
+.panel--explain dl div { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.16); }
+.panel--explain dt { color: #9eb6c6; }
+.panel--explain dd { margin: 0; color: #fff; font-weight: 700; text-align: right; }
+.orders-section { margin-top: 18px; padding: 30px; }
+.orders-section .section-heading { margin-bottom: 18px; }
+.empty-state { padding: 32px; border: 1px dashed #b7c9d4; color: #6e8290; text-align: center; }
+.order-list { border-top: 1px solid #d7e1e7; }
+.order-row { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 14px; min-height: 62px; border-bottom: 1px solid #d7e1e7; }
+.order-id { color: #708694; font-size: 12px; font-weight: 800; }
+.order-item { color: #25445b; font-weight: 700; }
+.order-item small { color: #8598a6; font-weight: 500; }
+.status { padding: 6px 10px; border-radius: 999px; background: #fff1d9; color: #a66516; font-size: 12px; font-weight: 800; }
+.status--processing { background: #e5effc; color: #2c66a4; }
+.status--shipped { background: #e2f6ee; color: #23704f; }
+
+@media (max-width: 760px) {
+	.shell { padding: 28px 16px 48px; }
+	.hero { display: block; }
+	.health-pill { display: inline-flex; margin-top: 20px; }
+	.signal-grid, .workspace { grid-template-columns: 1fr; }
+	.form-row { grid-template-columns: 1fr; }
+	.form-row button { width: 100%; }
+	.flow { flex-wrap: wrap; }
+	.flow i { min-width: 20px; }
+}

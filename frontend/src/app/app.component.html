@@ -1,0 +1,104 @@
+<main class="shell">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Aspire order room</p>
+      <h1>Watch a distributed order move.</h1>
+      <p class="intro">One request travels through the Order API, PostgreSQL, Redis, RabbitMQ, a Spring Boot worker, and notifications.</p>
+    </div>
+    <div class="health-pill" [class.offline]="!apiHealthy()">
+      <span class="health-dot"></span>
+      {{ apiHealthy() ? 'Order API healthy' : 'Waiting for Order API' }}
+    </div>
+  </header>
+
+  <section class="signal-grid" aria-label="Aspire signals">
+    <article class="signal-card signal-card--blue">
+      <span class="signal-label">Live endpoint</span>
+      <strong>{{ orders.baseUrl }}</strong>
+      <small>Injected by AppHost</small>
+    </article>
+    <article class="signal-card signal-card--orange">
+      <span class="signal-label">Resources in the flow</span>
+      <strong>5 connected services</strong>
+      <small>API, database, cache, queue, worker</small>
+    </article>
+    <article class="signal-card signal-card--green">
+      <span class="signal-label">Last dashboard-style check</span>
+      <strong>{{ lastUpdated() ? (lastUpdated() | date:'HH:mm:ss') : 'Waiting...' }}</strong>
+      <small>Polling every 3 seconds</small>
+    </article>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="alert" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="workspace">
+    <div class="panel panel--order">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Try the complete path</p>
+          <h2>Place an order</h2>
+        </div>
+        <span class="step-count">01 / 03</span>
+      </div>
+
+      <form (ngSubmit)="submit()">
+        <label for="item">What should we ship?</label>
+        <input id="item" name="item" placeholder="e.g. stainless steel valve" [ngModel]="item()"
+               (ngModelChange)="item.set($event)" required>
+        <div class="form-row">
+          <div>
+            <label for="quantity">Quantity</label>
+            <input id="quantity" name="quantity" type="number" min="1" [ngModel]="quantity()"
+                   (ngModelChange)="quantity.set($event)">
+          </div>
+          <button type="submit" [disabled]="submitting() || !apiHealthy()">
+            {{ submitting() ? 'Sending...' : 'Send through the system' }}
+            <span aria-hidden="true">-&gt;</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="flow" aria-label="Order processing flow">
+        <span>API</span><i></i><span>PostgreSQL</span><i></i><span>RabbitMQ</span><i></i><span>Worker</span>
+      </div>
+    </div>
+
+    <aside class="panel panel--explain">
+      <p class="eyebrow">What Aspire is showing</p>
+      <h2>One model, one view.</h2>
+      <p>The AppHost starts the resources, injects their addresses, waits for dependencies, and exposes health, logs, traces, and links in the dashboard.</p>
+      <dl>
+        <div><dt>Database</dt><dd>PostgreSQL volume</dd></div>
+        <div><dt>Fast reads</dt><dd>Redis cache</dd></div>
+        <div><dt>Background work</dt><dd>RabbitMQ + Java</dd></div>
+        <div><dt>Callback</dt><dd>Notification service</dd></div>
+      </dl>
+    </aside>
+  </section>
+
+  <section class="orders-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Live result</p>
+        <h2>Orders in the system</h2>
+      </div>
+      <span class="order-count">{{ orders.orders().length }} orders</span>
+    </div>
+
+    @if (orders.orders().length === 0) {
+      <div class="empty-state">Place an order above to watch its status change from Pending to Processing to Shipped.</div>
+    } @else {
+      <div class="order-list">
+        @for (o of orders.orders(); track o.id) {
+          <article class="order-row">
+            <span class="order-id">#{{ o.id }}</span>
+            <span class="order-item">{{ o.item }} <small>x{{ o.quantity }}</small></span>
+            <span class="status" [class.status--processing]="o.status === 'Processing'" [class.status--shipped]="o.status === 'Shipped'">{{ o.status }}</span>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</main>

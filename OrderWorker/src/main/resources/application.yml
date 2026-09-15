@@ -1,0 +1,13 @@
+spring:
+  rabbitmq:
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:amqp://guest:guest@localhost:5672}
+
+order-worker:
+  order-api-url: ${ORDER_API_URL:http://localhost:5100}
+  notifications-url: ${NOTIFICATIONS_URL:http://localhost:5200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

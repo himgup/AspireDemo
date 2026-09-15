@@ -1,0 +1,20 @@
+# Visual Studio and local IDE state
+.vs/
+.agents/
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Node dependencies and frontend build output
+**/node_modules/
+**/dist/
+**/.angular/
+
+# Generated Aspire frontend environment
+frontend/src/env.js
+
+# Local environment files
+.env
+.env.*
+!.env.example
