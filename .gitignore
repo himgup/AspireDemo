@@ -1,6 +1,5 @@
 # Visual Studio and local IDE state
 .vs/
-.agents/
 
 # .NET build output
 **/bin/
