@@ -1,3 +1,4 @@
+using OpenTelemetry.Logs;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing
         .AddAspNetCoreInstrumentation()
+        .AddOtlpExporter())
+    .WithLogging(logging => logging
         .AddOtlpExporter());
 
 var app = builder.Build();
@@ -19,12 +22,13 @@ app.MapGet("/health", () => Results.Ok(new
 }));
 
 // Mock webhook: logs whatever it receives instead of sending real email/SMS.
-app.MapPost("/notify", async (HttpContext ctx) =>
+app.MapPost("/notify", (NotificationRequest request, ILogger<Program> logger) =>
 {
-    using var reader = new StreamReader(ctx.Request.Body);
-    var body = await reader.ReadToEndAsync();
-    Console.WriteLine($"[notification] {DateTime.UtcNow:O} {body}");
+    logger.LogInformation("Order notification received: {OrderId} status={Status}",
+        request.OrderId, request.Status);
     return Results.Ok(new { received = true });
 });
 
 app.Run();
+
+record NotificationRequest(int OrderId, string Status);

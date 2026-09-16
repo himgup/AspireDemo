@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,6 +16,7 @@ import java.util.Map;
 @Component
 public class OrderConsumer {
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderConsumer.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private final RestTemplate rest = new RestTemplate(
         new JdkClientHttpRequestFactory(HttpClient.newHttpClient()));
@@ -26,6 +29,7 @@ public class OrderConsumer {
 
     @RabbitListener(queues = "orders")
     public void onOrder(String message) {
+        Integer orderId = null;
         try {
             JsonNode order = mapper.readTree(message);
             JsonNode idNode = order.get("id");
@@ -35,17 +39,20 @@ public class OrderConsumer {
             if (idNode == null || !idNode.canConvertToInt()) {
                 throw new IllegalArgumentException("Order message does not contain a valid id");
             }
-            int id = idNode.asInt();
+            orderId = idNode.asInt();
+            logger.info("order_consumed orderId={} status=Pending", orderId);
 
-            updateStatus(id, "Processing");
-            notify(id, "Processing");
+            updateStatus(orderId, "Processing");
+            notify(orderId, "Processing");
+            logger.info("order_processing orderId={} status=Processing", orderId);
 
             Thread.sleep(1500); // simulate work: pack, ship, etc.
 
-            updateStatus(id, "Shipped");
-            notify(id, "Shipped");
+            updateStatus(orderId, "Shipped");
+            notify(orderId, "Shipped");
+            logger.info("order_shipped orderId={} status=Shipped", orderId);
         } catch (Exception e) {
-            System.err.println("[order-worker] failed to process message: " + e.getMessage());
+            logger.error("order_processing_failed orderId={} error={}", orderId, e.getMessage(), e);
         }
     }
 

@@ -352,9 +352,29 @@ The API and notification service expose `/health`, and Aspire monitors those end
 
 ### 7. Logs, traces, and telemetry
 
-The API and notification service emit OpenTelemetry traces. Aspire adds its OTLP exporter so the dashboard can show request activity.
+The API and notification service emit OpenTelemetry traces and structured logs through the OTLP exporter. The Java worker emits searchable lifecycle logs through its container output.
 
-**Show:** the Order API request trace and notification logs after placing an order.
+**Show:** the Order API request trace and the order lifecycle logs after placing an order.
+
+For a focused walkthrough, copy the order ID from the API response or the Angular page, then filter the dashboard logs for that ID across these resources:
+
+```text
+orderapi       Order created: {OrderId} ... status=Pending
+orderapi       Order published: {OrderId} queue=orders status=Pending
+orderworker    order_consumed orderId={OrderId} status=Pending
+orderapi       Order status updated: {OrderId} status=Processing
+notifications  Order notification received: {OrderId} status=Processing
+orderworker    order_processing orderId={OrderId} status=Processing
+orderapi       Order status updated: {OrderId} status=Shipped
+notifications  Order notification received: {OrderId} status=Shipped
+orderworker    order_shipped orderId={OrderId} status=Shipped
+```
+
+Suggested sentence:
+
+> I can take one business identifier, the order ID, and follow its lifecycle across three different services. Logs tell me what happened; the trace tells me which HTTP calls and timings made it happen.
+
+The worker currently provides console logs rather than OpenTelemetry logs because it does not yet include a Java OpenTelemetry exporter. This is still useful for demonstrating cross-resource log inspection, but it is not one continuous trace across the RabbitMQ and Java boundary.
 
 ### 8. Local secrets
 
