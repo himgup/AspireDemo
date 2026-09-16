@@ -3,10 +3,12 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using OrderApi.Data;
 using OrderApi.Models;
+using OrderApi;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 using OrderModel = OrderApi.Models.Order;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +21,16 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddOtlpExporter())
+    .WithMetrics(metrics => metrics
+        .AddMeter("Microsoft.AspNetCore.Hosting")
+        .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+        .AddMeter("System.Net.Http")
+        .AddMeter(OrderMetrics.MeterName)
+        .AddOtlpExporter())
     .WithLogging(logging => logging
         .AddOtlpExporter());
 
+builder.Services.AddSingleton<OrderMetrics>();
 builder.Services.AddDbContext<OrderDbContext>(o =>
     o.UseNpgsql(builder.Configuration.GetConnectionString("orders")));
 
@@ -47,11 +56,12 @@ using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<OrderDbContext>().Database.EnsureCreated();
 }
 
-app.MapPost("/orders", async (CreateOrderRequest req, OrderDbContext db, IConnectionMultiplexer redis, IConnection rabbit, ILogger<Program> logger) =>
+app.MapPost("/orders", async (CreateOrderRequest req, OrderDbContext db, IConnectionMultiplexer redis, IConnection rabbit, OrderMetrics metrics, ILogger<Program> logger) =>
 {
     var order = new OrderModel { Item = req.Item, Quantity = req.Quantity, Status = "Pending" };
     db.Orders.Add(order);
     await db.SaveChangesAsync();
+    metrics.RecordCreated();
     logger.LogInformation("Order created: {OrderId} item={Item} quantity={Quantity} status={Status}",
         order.Id, order.Item, order.Quantity, order.Status);
 
@@ -83,7 +93,7 @@ app.MapGet("/orders/{id:int}", async (int id, OrderDbContext db, IConnectionMult
     return Results.Ok(order);
 });
 
-app.MapPatch("/orders/{id:int}/status", async (int id, UpdateStatusRequest req, OrderDbContext db, IConnectionMultiplexer redis, IHttpClientFactory httpFactory, ILogger<Program> logger) =>
+app.MapPatch("/orders/{id:int}/status", async (int id, UpdateStatusRequest req, OrderDbContext db, IConnectionMultiplexer redis, OrderMetrics metrics, IHttpClientFactory httpFactory, ILogger<Program> logger) =>
 {
     var order = await db.Orders.FindAsync(id);
     if (order is null) return Results.NotFound();
@@ -91,6 +101,7 @@ app.MapPatch("/orders/{id:int}/status", async (int id, UpdateStatusRequest req, 
     order.Status = req.Status;
     await db.SaveChangesAsync();
     await redis.GetDatabase().StringSetAsync($"order:{id}", JsonSerializer.Serialize(order), TimeSpan.FromMinutes(10));
+    metrics.RecordStatusChange(id, req.Status);
     logger.LogInformation("Order status updated: {OrderId} status={Status}", id, req.Status);
 
     if (!string.IsNullOrEmpty(notificationsUrl))

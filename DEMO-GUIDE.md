@@ -312,7 +312,7 @@ Suggested sentence:
 
 > One button click becomes a distributed workflow, but Aspire lets us start and inspect the whole workflow from one place.
 
-## The ten Aspire features demonstrated
+## The eleven Aspire features demonstrated
 
 ### 1. One application model
 
@@ -376,13 +376,41 @@ Suggested sentence:
 
 The worker currently provides console logs rather than OpenTelemetry logs because it does not yet include a Java OpenTelemetry exporter. This is still useful for demonstrating cross-resource log inspection, but it is not one continuous trace across the RabbitMQ and Java boundary.
 
-### 8. Local secrets
+### 8. Business metrics
+
+The Order API publishes custom metrics through OpenTelemetry, and both .NET services also subscribe to built-in ASP.NET Core, Kestrel, and `System.Net.Http` meters.
+
+The custom Order API meter is named `AspireDemo.OrderApi` and includes:
+
+- `aspire.demo.orders.created` - order throughput
+- `aspire.demo.orders.pending` - current number of orders waiting for processing
+- `aspire.demo.orders.status.changes` - status changes, filterable by `order.status`
+- `aspire.demo.order.processing.duration` - Processing-to-Shipped duration in seconds, filterable by `order.outcome`
+
+**Show:** open the `orderapi` Metrics page, select the `AspireDemo.OrderApi` meter, and switch between the chart and table views.
+
+Suggested demo sequence:
+
+1. Create several orders and show `orders.created` increasing.
+2. Stop the `orderworker` resource from the dashboard.
+3. Create more orders and show `orders.pending` rising while `orderapi` remains healthy.
+4. Restart the worker and show the pending value falling as messages are processed.
+5. Open `order.processing.duration` and explain the histogram produced by the worker's simulated processing delay.
+6. If the chart displays an exemplar dot, select it to navigate from the metric data point to the related trace.
+
+Suggested sentence:
+
+> Health tells me that a service is alive. Metrics tell me whether the business is flowing, and an exemplar can take me from a suspicious metric point to the trace that produced it.
+
+The pending gauge and processing-duration state are intentionally held in memory for this presentation. They reset when the Order API restarts and are not production-grade backlog accounting. The demo uses `orderId` in structured logs rather than as a metric dimension to avoid high-cardinality metric series.
+
+### 9. Local secrets
 
 The AppHost creates a persisted secret parameter named `demo-secret` and passes it to the API and notification service without putting the generated value in source code.
 
 **Show:** the `AddParameter(...)` call and explain that the value is local configuration, not a value committed to Git.
 
-### 9. Flexible resource selection
+### 10. Flexible resource selection
 
 The AppHost can enable or disable the frontend, worker, and notification service through `AppHost/appsettings.json`.
 
@@ -405,7 +433,7 @@ Restore all three values to `true` before the main presentation.
 
 Keep `WorkerEnabled` and `NotificationsEnabled` enabled together for the complete order lifecycle. The worker sends status notifications while it processes an order; if notifications are disabled while the worker remains enabled, the worker falls back to its local default URL and the notification calls will fail.
 
-### 10. Endpoint and port management
+### 11. Endpoint and port management
 
 The frontend port is configured through the AppHost, and the Order API endpoint is injected into the frontend at startup. Aspire publishes the actual endpoint values in the dashboard.
 

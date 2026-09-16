@@ -59,3 +59,4 @@ The enabled resources and frontend port can be changed in `AppHost/appsettings.j
 - Order data model is minimal: `id, item, quantity, status`.
 - `NotificationService` only logs — swap in a real email/SMS provider later.
 - No auth, no retries/dead-lettering, no tests — this is a demo scaffold, not production code.
+- The Order API includes demo-focused OpenTelemetry metrics for order throughput, pending backlog, status changes, and processing duration. The backlog and duration state is intentionally in-memory and resets when the API restarts.
