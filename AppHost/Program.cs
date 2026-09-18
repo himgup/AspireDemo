@@ -64,6 +64,12 @@ if (workerEnabled)
         .WithEnvironment("SPRING_RABBITMQ_ADDRESSES", rabbitmq.Resource.ConnectionStringExpression)
         .WithEnvironment("ORDER_API_URL", orderApi.GetEndpoint("http"))
         .WithEnvironment("DEMO_SECRET", demoSecret)
+        .WithEnvironment("OTEL_SERVICE_NAME", "orderworker")
+        .WithEnvironment("OTEL_TRACES_EXPORTER", "otlp")
+        .WithEnvironment("OTEL_METRICS_EXPORTER", "otlp")
+        .WithEnvironment("OTEL_LOGS_EXPORTER", "otlp")
+        .WithEnvironment("OTEL_EXPORTER_OTLP_CERTIFICATE", "/usr/lib/ssl/aspire/cert.pem")
+        .WithOtlpExporter()
         .WaitFor(rabbitmq)
         .WaitFor(orderApi);
 
